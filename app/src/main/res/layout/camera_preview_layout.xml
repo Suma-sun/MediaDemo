@@ -37,14 +37,14 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:text="拍照保存"
         />
-    <Button
+    <!--<Button
         android:id="@+id/btn_open_dir"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dimen_48_dp"
         app:layout_constraintBottom_toTopOf="@id/btn_camera_switch"
         app:layout_constraintLeft_toRightOf="@id/btn_take_pic"
         android:text="打开文件夹"
-        />
+        />-->
 
     <SurfaceView
         android:id="@+id/view_surface"
