@@ -951,11 +951,27 @@ public final class FileUtils {
 	 */
 	public static byte[] getFileMD5(final File file) {
 		if (file == null) return null;
-		DigestInputStream dis = null;
 		try {
 			FileInputStream fis = new FileInputStream(file);
+			return getFileMD5(fis);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * 获取输入流的MD5校验码
+	 *
+	 * @param inputStream 输入流
+	 * @return 输入流的MD5校验码
+	 */
+	public static byte[] getFileMD5(InputStream inputStream) {
+		if (inputStream == null) return null;
+		DigestInputStream dis = null;
+		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
-			dis = new DigestInputStream(fis, md);
+			dis = new DigestInputStream(inputStream, md);
 			byte[] buffer = new byte[1024 * 256];
 			while (true) {
 				if (!(dis.read(buffer) > 0)) break;

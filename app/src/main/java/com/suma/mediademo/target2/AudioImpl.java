@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -70,7 +72,7 @@ public class AudioImpl implements Audioable {
 
 	private WeakReference<Context> mContext;
 
-	private AtomicReference<State> mState;
+	AtomicReference<State> mState;
 
 	private Handler mHandler;
 	/**
@@ -82,6 +84,8 @@ public class AudioImpl implements Audioable {
 	 */
 	private File mWAVFile;
 
+	private ExecutorService mThreadPool;
+
 	public AudioImpl(Context context, String pcmFilePath, String wavFilePath) {
 		this.mContext = new WeakReference<>(context);
 		Log.d(TAG, "pcmFilePath = " + pcmFilePath);
@@ -90,6 +94,7 @@ public class AudioImpl implements Audioable {
 		mPCMFile = new File(pcmFilePath);
 		mWAVFile = new File(wavFilePath);
 		mHandler = new Handler(context.getMainLooper());
+		mThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 
@@ -120,7 +125,7 @@ public class AudioImpl implements Audioable {
 			return;
 		}
 		if (fileName.endsWith(Constant.PCM_EXTENSION)) {
-			new AudioTrackPlayThread(fileName).start();
+			mThreadPool.submit(new AudioTrackPlayThread(this,fileName));
 			return;
 		}
 
@@ -138,18 +143,6 @@ public class AudioImpl implements Audioable {
 			} else {
 				context.startActivity(intent);
 			}
-//			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//			intent.addCategory(Intent.CATEGORY_DEFAULT);
-//			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//			Uri uri = null;
-//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//				uri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".FileProvider", new File(file.getParent()));
-//				intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//			}
-//			else
-//				uri = Uri.fromFile(new File(file.getParent()));
-//			intent.setDataAndType(uri, "*/*");
-//			context.startActivity(intent);
 		}
 	}
 
@@ -160,15 +153,11 @@ public class AudioImpl implements Audioable {
 	 */
 	@Override
 	public void record(String fileName) {
-//		if (mAudioRecord == null) {
-//			toast("AudioRecord异常");
-//			return;
-//		}
 		if (mState.get() != State.IDLE) {
 			toast("录音失败,当前状态为:" + mState.get().name());
 			return;
 		}
-		new AudioRecordThread().start();
+		mThreadPool.submit(new AudioRecordThread(this,mPCMFile,mWAVFile));
 
 	}
 
@@ -187,14 +176,30 @@ public class AudioImpl implements Audioable {
 	}
 
 	/**
+	 * 释放资源
+	 */
+	@Override
+	public void release() {
+		if (mThreadPool != null && !mThreadPool.isShutdown()) {
+			mThreadPool.shutdown();
+		}
+	}
+
+	/**
 	 * 音频录制线程
 	 */
-	private class AudioRecordThread extends Thread {
+	private static class AudioRecordThread extends Thread {
 		//wav文件头最少44位(不包含附加信息)
 		private static final int WAV_HEADER_LEN = 44;
 		private AudioRecord audioRecord;
+		private File pcmFile;
+		private File wavFile;
+		private WeakReference<AudioImpl> reference;
 
-		public AudioRecordThread() {
+		public AudioRecordThread(AudioImpl impl, File pcm, File wav) {
+			reference = new WeakReference<AudioImpl>(impl);
+			pcmFile = pcm;
+			wavFile = wav;
 			audioRecord = createRecord();
 		}
 
@@ -211,36 +216,39 @@ public class AudioImpl implements Audioable {
 
 		@Override
 		public void run() {
-			mState.set(AudioImpl.State.RECORDING);//设置当前状态为录音中
-			notityState(AudioImpl.State.RECORDING);
-			FileUtils.createFileByDeleteOldFile(mPCMFile);
-			FileUtils.createFileByDeleteOldFile(mWAVFile);
+			AudioImpl instance = reference.get();
+			if (instance == null)
+				return;
+			instance.mState.set(AudioImpl.State.RECORDING);//设置当前状态为录音中
+			instance.notityState(AudioImpl.State.RECORDING);
+			FileUtils.createFileByDeleteOldFile(pcmFile);
+			FileUtils.createFileByDeleteOldFile(wavFile);
 			audioRecord.startRecording();//开始录音
 			FileOutputStream outputStream = null;
 			try {
-				outputStream = new FileOutputStream(mPCMFile);//创建输出的文件
+				outputStream = new FileOutputStream(pcmFile);//创建输出的文件
 				byte[] buffer = new byte[BYTE_SIZE];
 				int len;
 				int fileSize = 0;
-				while (mState.get() == AudioImpl.State.RECORDING && !interrupted()) {
+				while (instance.mState.get() == AudioImpl.State.RECORDING && !interrupted()) {
 					len = audioRecord.read(buffer, 0, buffer.length);
 					outputStream.write(buffer, 0, len);
 					fileSize += len;
 				}
 				outputStream.close();//关闭流
-				convertWav(mPCMFile, mWAVFile, fileSize);
+				convertWav(pcmFile, wavFile, fileSize);
 			} catch (IOException e) {
 				e.printStackTrace();
-				mState.set(AudioImpl.State.ERROR);
-				notityState(AudioImpl.State.ERROR);
+				instance.mState.set(AudioImpl.State.ERROR);
+				instance.notityState(AudioImpl.State.ERROR);
 				return;
 			} finally {
 				audioRecord.stop();//停止录制
 				audioRecord.release();
 				audioRecord = null;
 			}
-			mState.set(AudioImpl.State.IDLE);
-			notityState(AudioImpl.State.IDLE);
+			instance.mState.set(AudioImpl.State.IDLE);
+			instance.notityState(AudioImpl.State.IDLE);
 		}
 
 		private void convertWav(File src, File des, int fileSize) {
@@ -314,11 +322,13 @@ public class AudioImpl implements Audioable {
 	/**
 	 * 音频播放线程
 	 */
-	private class AudioTrackPlayThread extends Thread {
+	private static class AudioTrackPlayThread extends Thread {
+		private WeakReference<AudioImpl> reference;
 		private AudioTrack audioTrack;
 		private File file;
 
-		public AudioTrackPlayThread(String filePath) {
+		public AudioTrackPlayThread(AudioImpl impl, String filePath) {
+			reference = new WeakReference<AudioImpl>(impl);
 			file = new File(filePath);
 			if (!file.exists()) {
 				throw new RuntimeException("播放文件不能为空");
@@ -328,36 +338,39 @@ public class AudioImpl implements Audioable {
 
 		@Override
 		public void run() {
-			mState.set(AudioImpl.State.PLAYING);//设置状态播放中
-			notityState(AudioImpl.State.PLAYING);
+			AudioImpl instance = reference.get();
+			if (instance == null)
+				return;
+			instance.mState.set(AudioImpl.State.PLAYING);//设置状态播放中
+			instance.notityState(AudioImpl.State.PLAYING);
 			try {
 				FileInputStream inputStream = new FileInputStream(file);
 				byte[] buffer = new byte[BYTE_SIZE];
 				int len = 0;
 				audioTrack.play();
-				while (mState.get() == AudioImpl.State.PLAYING && !interrupted()
+				while (instance.mState.get() == AudioImpl.State.PLAYING && !interrupted()
 						&& (len = inputStream.read(buffer, 0, buffer.length)) > 0) {
 					audioTrack.write(buffer, 0, len);
 				}
 				inputStream.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-				mState.set(AudioImpl.State.ERROR);
-				notityState(AudioImpl.State.ERROR);
+				instance.mState.set(AudioImpl.State.ERROR);
+				instance.notityState(AudioImpl.State.ERROR);
 				return;
 			} finally {
 				audioTrack.stop();//停止播放音频流数据
 				audioTrack.release();//释放底层音频数据
 				audioTrack = null;
 			}
-			mState.set(AudioImpl.State.IDLE);
-			notityState(AudioImpl.State.IDLE);
+			instance.mState.set(AudioImpl.State.IDLE);
+			instance.notityState(AudioImpl.State.IDLE);
 		}
 
 		private AudioTrack createTrack() {
 			//缓冲区大小
 			int playBufferSize = AudioTrack.getMinBufferSize(MAX_HZ, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
-			AudioTrack audioTrack = null;
+			AudioTrack audioTrack;
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				AudioAttributes.Builder builder = new AudioAttributes.Builder();
 				builder.setUsage(AudioAttributes.USAGE_MEDIA);

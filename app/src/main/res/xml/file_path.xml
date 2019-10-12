@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths xmlns:android="http://schemas.android.com/apk/res/android">`
+<paths>`
     <external-path
-        name="external_files"
-        path="/"/>path
+        name="external"
+        path="Media_Demo/"/>
 
     <cache-path
-        name="cache_path"
+        name="cache"
         path="/"/>
 
     <external-cache-path
-        name="mediaDemo"
-        path="Audio"/>
+        name="Media_Demo"
+        path="Media_Demo/"/>
 
     <!--<root-path-->
         <!--name="root"-->

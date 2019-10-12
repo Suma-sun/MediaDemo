@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   android:background="@android:color/white"
+                                                   android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_surfaceview"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/dimen_48_dp"
+        android:text="SurfaceView 预览"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_textureview"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/dimen_48_dp"
+        android:text="TextureView 预览"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_surfaceview"/>
+
+    <Button
+        android:id="@+id/btn_camera_switch"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/dimen_48_dp"
+        android:text="切换相机"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_textureview"/>
+
+    <Button
+        android:id="@+id/btn_take_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dimen_48_dp"
+        android:text="拍照保存"
+        app:layout_constraintBottom_toTopOf="@id/btn_camera_switch"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
+    <!--<Button-->
+        <!--android:id="@+id/btn_open_dir"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="@dimen/dimen_48_dp"-->
+        <!--app:layout_constraintBottom_toTopOf="@id/btn_camera_switch"-->
+        <!--app:layout_constraintLeft_toRightOf="@id/btn_take_pic"-->
+        <!--android:text="打开文件夹"-->
+        <!--/>-->
+
+    <SurfaceView
+        android:id="@+id/view_surface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <TextureView
+        android:id="@+id/view_texture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

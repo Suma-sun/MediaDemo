@@ -5,10 +5,10 @@ import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -16,15 +16,11 @@ import com.suma.mediademo.target1.surfaceview.SurfaceViewDrawPictureFragment;
 import com.suma.mediademo.target1.view.ViewDrawPictureFragment;
 import com.suma.mediademo.target2.AudioFragment;
 import com.suma.mediademo.target3.CameraPreviewFragment;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.suma.mediademo.target4.MediaExtractorAndMuxerFragment;
+import com.suma.mediademo.utils.UiUtils;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 	/**
@@ -34,13 +30,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 	private ListView mListView;
 	private ArrayAdapter<String> mAdapter;
-	private FrameLayout mRoot;
-	private List<String> mTags = new ArrayList<String>() {{
-		add("View draw picture");
-		add("SurfaceView draw picture");
-		add("AudioRecordPlay");
-		add("Camera preview");
-	}};
+
 	//SDK是否>= M
 	private boolean mIsNeedPermission = false;
 
@@ -50,6 +40,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 	private String[] mAutoPermissions;
 	//相机权限
 	private String[] mCameraPermissions;
+	/**
+	 * 指定打开的fragment的类名
+	 */
+	private String mTargetName;
 
 
 	@TargetApi(Build.VERSION_CODES.M)
@@ -66,11 +60,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mListView = findViewById(R.id.list);
-		mRoot = findViewById(R.id.fragment);
 		mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 		mAdapter.addAll(getItems());
-		//text1
 		mListView.setAdapter(mAdapter);
+		mListView.setPadding(0,600,0,0);
 		mListView.setOnItemClickListener(this);
 
 		initPermisions();
@@ -81,64 +74,55 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				"自定义View绘制图片",
 				"SurfaceView绘制图片",
 				"音频录制播放",
-				"Camera预览"
+				"Camera预览",
+				"MP4解析与封装"
 		};
-	}
-
-	private void showFragment(FragmentManager manager, Fragment fragment, String tag) {
-		FragmentTransaction transaction = manager.beginTransaction();
-		transaction.replace(R.id.fragment, fragment, tag);
-//		transaction.add();
-		transaction.commit();
-		show(true);
-	}
-
-	private void show(boolean isShowFragment) {
-		mListView.setVisibility(isShowFragment ? View.GONE : View.VISIBLE);
-		mRoot.setVisibility(!isShowFragment ? View.GONE : View.VISIBLE);
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-		FragmentManager manager = getSupportFragmentManager();
-		Fragment fragment;
-		String tag = mTags.get(i);
-		fragment = manager.findFragmentByTag(tag);
+		boolean isRequestPermission = false;
+		mTargetName = null;
 		switch (i) {
 			case 0:
-				if (fragment == null) {
-					fragment = new ViewDrawPictureFragment();
-				}
+				mTargetName = ViewDrawPictureFragment.class.getName();
 				break;
 			case 1:
-				if (fragment == null) {
-					fragment = new SurfaceViewDrawPictureFragment();
-				}
-
+				mTargetName = SurfaceViewDrawPictureFragment.class.getName();
+				break;
 			case 2:
-				if (fragment == null) {
-					fragment = new AudioFragment();
-				}
+				mTargetName = AudioFragment.class.getName();
 				requestPremission(mAutoPermissions);
+				isRequestPermission = true;
 				break;
 			case 3:
-				if (fragment == null){
-					fragment = new CameraPreviewFragment();
-				}
+				mTargetName = CameraPreviewFragment.class.getName();
 				requestPermissionsImpl(mCameraPermissions);
+				isRequestPermission = true;
+				break;
+			case 4:
+				mTargetName = MediaExtractorAndMuxerFragment.class.getName();
+				requestPermissionsImpl(mRWPermissions);
+				isRequestPermission = true;
 				break;
 			default:
 				return;
 		}
-		showFragment(manager, fragment, tag);
+		//需求请求权限,跳转为权限请求后执行
+		if (!isRequestPermission) {
+			startFragment(mTargetName);
+		}
+	}
+
+	private void startFragment(String name) {
+		if (!TextUtils.isEmpty(name))
+			FragmentActivity.openFragment(this, name);
+		else
+			UiUtils.showToast(this,"目标为空");
 	}
 
 	@Override
 	public void onBackPressed() {
-		if (mRoot.getVisibility() == View.VISIBLE) {
-			show(false);
-			return;
-		}
 		super.onBackPressed();
 	}
 
@@ -154,6 +138,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 		boolean hasPermission = checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_GRANTED;
 		if (!hasPermission) {
 			requestPermissions(permissions, REQUEST_PERMISSIONS_CODE);
+		} else {
+			startFragment(mTargetName);
 		}
 	}
 
@@ -167,5 +153,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				return;
 			}
 		}
+		startFragment(mTargetName);
 	}
 }

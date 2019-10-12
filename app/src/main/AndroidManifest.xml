@@ -27,7 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        
+
+        <activity android:name=".FragmentActivity"/>
        <provider
            android:authorities="${applicationId}.FileProvider"
            android:name="androidx.core.content.FileProvider"

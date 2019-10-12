@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class Constant {
 
-	public static final String POJECT_NAME = "Meadia_Demo";
+	static final String POJECT_NAME = "Media_Demo";
 	private static String mRootPath;
 
 	/** 音频文件夹名 */
@@ -27,7 +27,6 @@ public class Constant {
 	/** WAV文件扩展名 */
 	public static final String WAV_EXTENSION = "wav";
 
-
 	public static void init(Context context){
 		Context app = context.getApplicationContext();
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
@@ -35,7 +34,7 @@ public class Constant {
 			if (file != null)
 				mRootPath = file.getAbsolutePath() + File.separator + POJECT_NAME + File.separator;
 		} else {
-			mRootPath = FileUtils.getRootPath(app);
+			mRootPath = FileUtils.getRootPath(app) + File.separator;
 		}
 	}
 

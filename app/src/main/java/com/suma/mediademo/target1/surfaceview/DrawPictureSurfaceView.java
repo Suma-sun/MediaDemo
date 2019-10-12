@@ -4,11 +4,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.suma.mediademo.R;
+import com.suma.mediademo.utils.Log;
+import com.suma.mediademo.utils.SafeHandler;
 import com.suma.mediademo.utils.UiUtils;
 
 /**
@@ -18,16 +22,15 @@ import com.suma.mediademo.utils.UiUtils;
  *
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-06-30]
+ * @version [1.1 2019-10-12] 由Thread改为HanderThread和Hander执行绘制操作
  */
-public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder.Callback, SafeHandler.OnHandlerMessage {
 
+	private static final int MSG_DRAW = 0X1001;
 	private SurfaceHolder mHolder;
 	private Canvas mCanvas;
-
-	/**
-	 * 控制绘制线程的标记位
-	 */
-	private boolean mIsDrawing;
+	private HandlerThread mHandlerThread;
+	private SafeHandler mHandler;
 
 	private Bitmap mBitmap;
 
@@ -42,6 +45,7 @@ public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder
 		setFocusable(true);//允许获得焦点
 		setFocusableInTouchMode(true);//允许通过触摸获得焦点
 		this.setKeepScreenOn(true);//保持常亮
+
 	}
 
 
@@ -56,8 +60,10 @@ public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder
 	 */
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		mIsDrawing = true;
-		new Thread(this).start();//启动绘制线程
+		mHandlerThread = new HandlerThread("SurfaceView Thread");
+		mHandlerThread.start();
+		mHandler = new SafeHandler(mHandlerThread.getLooper(), this);
+		mHandler.sendEmptyMessage(MSG_DRAW);
 	}
 
 	/**
@@ -87,44 +93,28 @@ public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder
 	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		mIsDrawing = false;
-	}
-
-	/**
-	 * When an object implementing interface <code>Runnable</code> is used
-	 * to create a thread, starting the thread causes the object's
-	 * <code>run</code> method to be called in that separately executing
-	 * thread.
-	 * <p>
-	 * The general contract of the method <code>run</code> is that it may
-	 * take any action whatsoever.
-	 *
-	 * @see Thread#run()
-	 */
-	@Override
-	public void run() {
-		while (mIsDrawing) {
-			try {
-				mCanvas = mHolder.lockCanvas();
-				int width = getMeasuredWidth();
-				int height = getMeasuredHeight();
-				Bitmap bitmap = UiUtils.getResBitmap(getContext().getResources(), R.mipmap.server,width,height);
-				mBitmap = Bitmap.createScaledBitmap(bitmap,width,height,false);
-				draw();
-			} finally {
-				if (mCanvas != null){
-					mHolder.unlockCanvasAndPost(mCanvas);//提交绘制内容
-				}
-			}
-
-		}
+		mHandlerThread.quit();
+		mHandlerThread = null;
+		mHandler = null;
 	}
 
 	private void draw() {
-		if (mCanvas != null){
+		//子线程绘制图片
+		Log.d(this," is mainThread " + UiUtils.isRunOnUiThread());
+		try {
+			//锁住画布
+			mCanvas = mHolder.lockCanvas();
+			int width = getMeasuredWidth();
+			int height = getMeasuredHeight();
+			Bitmap bitmap = UiUtils.getResBitmap(getContext().getResources(), R.mipmap.server,width,height);
+			mBitmap = Bitmap.createScaledBitmap(bitmap,width,height,false);
 			mCanvas.drawBitmap(mBitmap,0,0,new Paint());
+		} finally {
+			if (mCanvas != null){
+				//解除锁定,并提交绘制内容,绘制在主线程
+				mHolder.unlockCanvasAndPost(mCanvas);
+			}
 		}
-
 	}
 
 	/**
@@ -140,5 +130,15 @@ public class DrawPictureSurfaceView extends SurfaceView implements SurfaceHolder
 	@Override
 	public void draw(Canvas canvas) {
 		super.draw(canvas);
+	}
+
+	@Override
+	public void onHandleMessage(Message msg) {
+		final int what = msg.what;
+		switch (what) {
+			case MSG_DRAW:
+				draw();
+				break;
+		}
 	}
 }

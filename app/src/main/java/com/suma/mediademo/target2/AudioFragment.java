@@ -7,14 +7,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.suma.mediademo.BaseFragment;
 import com.suma.mediademo.utils.Constant;
 
 import java.io.File;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 
 /**
  * 录制音频写入文件,读取文件播放音频 <br>
@@ -23,7 +22,7 @@ import androidx.fragment.app.Fragment;
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-07-01]
  */
-public class AudioFragment extends Fragment implements View.OnClickListener {
+public class AudioFragment extends BaseFragment implements View.OnClickListener {
 
 	private Button mBtnRecord;
 	private Button mBtnPlayPCM;
@@ -50,8 +49,8 @@ public class AudioFragment extends Fragment implements View.OnClickListener {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		LinearLayout view = new LinearLayout(getContext());
 		view.setOrientation(LinearLayout.VERTICAL);
-		view.setPadding(0,200,0,0);
-		ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		view.setPadding(0,800,0,0);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		view.setLayoutParams(params);
 		LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 //		params1.setMargins(16,0,16,200);
@@ -90,5 +89,12 @@ public class AudioFragment extends Fragment implements View.OnClickListener {
 		}else if (v == mBtnStop){
 			mAudioImpl.stop();
 		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if (mAudioImpl != null)
+			mAudioImpl.release();
 	}
 }

@@ -16,6 +16,7 @@ import java.io.InputStream;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * UI相关工具类 <br>
@@ -37,7 +38,9 @@ public class UiUtils {
 	 * @param context 上下文
 	 * @param toastId 资源Id
 	 */
-	public static void showToast(@NonNull Context context, int toastId) {
+	public static void showToast(@Nullable Context context, int toastId) {
+		if (context == null)
+			return;
 		final Context application = context.getApplicationContext();
 		showToast(application, application.getString(toastId));
 	}
@@ -48,7 +51,9 @@ public class UiUtils {
 	 * @param context 上下文
 	 * @param text    显示的文本
 	 */
-	public static void showToast(@NonNull Context context, String text) {
+	public static void showToast(@Nullable Context context, String text) {
+		if (context == null)
+			return;
 		if (!isRunOnUiThread()) {
 			Looper.prepare();
 			showCustomToast(context, text);

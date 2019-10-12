@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.suma.mediademo.BaseFragment;
 import com.suma.mediademo.R;
 import com.suma.mediademo.utils.Constant;
 import com.suma.mediademo.utils.FileUtils;
@@ -35,7 +36,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 /**
  * 使用SurfaceView,TextrueView回显Camera预览数据 <br>
@@ -43,8 +43,8 @@ import androidx.fragment.app.Fragment;
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-09-09]
  */
-public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Callback, Camera.PreviewCallback, TextureView.SurfaceTextureListener {
-	public static final String TAG = "CameraPreviewFragment";
+public class CameraPreviewFragment extends BaseFragment implements SurfaceHolder.Callback, Camera.PreviewCallback, TextureView.SurfaceTextureListener {
+	private static final String TAG = "CameraPreviewFragment";
 	private static final int TYPE_NON = 0;
 
 	private static final int TYPE_SURFACE = 1;
@@ -90,7 +90,7 @@ public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Cal
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.camera_preview_layout, container, false);
+		return inflater.inflate(R.layout.fragment_camera_preview, container, false);
 	}
 
 	@Override
@@ -153,17 +153,8 @@ public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Cal
 			}
 		});
 //		mBtnOpenDir.setOnClickListener(v -> {
-//			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//			Uri uri = null;
-//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//				uri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".FileProvider", mDir);
-//				intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//			} else
-//				uri = Uri.fromFile(mDir);
-//			intent.setDataAndType(uri, "*/*");
+//			Intent intent =OpenFileUtil.openFile(getContext(),mDir.getPath());
 //			getContext().startActivity(intent);
-//
 //
 //		});
 	}
@@ -273,7 +264,7 @@ public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Cal
 	 * @param cameraId cameraId
 	 * @param camera   camera
 	 */
-	public void setCameraDisplayOrientation(Activity activity,
+	private void setCameraDisplayOrientation(Activity activity,
 											int cameraId, Camera camera) {
 		android.hardware.Camera.CameraInfo info =
 				new android.hardware.Camera.CameraInfo();
@@ -330,7 +321,7 @@ public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Cal
 	/**
 	 * 将帧数据保存为图片
 	 *
-	 * @param data
+	 * @param data 帧数据
 	 */
 	private void onSavePicture(byte[] data) {
 		if (!mExecutor.isShutdown()) {
@@ -442,7 +433,7 @@ public class CameraPreviewFragment extends Fragment implements SurfaceHolder.Cal
 			File file = new File(dir, name);
 			boolean isSuccess = FileUtils.createOrExistsFile(file);
 			//一个可以将YUV数据压缩为JPEG数据的类
-			YuvImage image = null;
+			YuvImage image;
 			image = new YuvImage(data, ImageFormat.NV21, width, height, null);
 			FileOutputStream fileOutputStream = null;
 			try {

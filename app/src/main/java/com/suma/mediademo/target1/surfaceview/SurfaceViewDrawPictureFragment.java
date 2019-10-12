@@ -6,10 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.suma.mediademo.BaseFragment;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 
 /**
  * 使用SurfaceView,绘制图片 <br>
@@ -17,13 +17,13 @@ import androidx.fragment.app.Fragment;
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-06-27]
  */
-public class SurfaceViewDrawPictureFragment extends Fragment {
+public class SurfaceViewDrawPictureFragment extends BaseFragment {
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		LinearLayout view = new LinearLayout(getContext());
-		ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 		view.setLayoutParams(params);
 		view.addView(new DrawPictureSurfaceView(getContext()),new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		return view;

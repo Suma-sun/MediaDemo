@@ -53,40 +53,42 @@ public class OpenFileUtil {
 	}
 
 	// Android获取一个用于打开APK文件的intent
-	public static Intent getAllIntent(Context context, String authority, String param) {
+	private static Intent getAllIntent(Context context, String authority, String param) {
 		Intent intent = new Intent();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(Intent.ACTION_VIEW);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "*/*");
 		return intent;
 	}
 
 	// Android获取一个用于打开APK文件的intent
-	public static Intent getApkFileIntent(Context context, String authority, String param) {
-
+	private static Intent getApkFileIntent(Context context, String authority, String param) {
 		Intent intent = new Intent();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(Intent.ACTION_VIEW);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/vnd.android.package-archive");
 		return intent;
 	}
 
 	// Android获取一个用于打开VIDEO文件的intent
-	public static Intent getVideoFileIntent(Context context, String authority, String param) {
+	private static Intent getVideoFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra("oneshot", 0);
 		intent.putExtra("configchange", 0);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "video/*");
 		return intent;
 	}
 
 	// Android获取一个用于打开AUDIO文件的intent
-	public static Intent getAudioFileIntent(Context context, String authority, String param) {
+	private static Intent getAudioFileIntent(Context context, String authority, String param) {
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra("oneshot", 0);
@@ -112,9 +114,17 @@ public class OpenFileUtil {
 			return Uri.fromFile(new File(param));
 	}
 
+	/**
+	 * 设置必要的flags,比如请求权限
+	 * @param intent
+	 */
+	private static void addFlags(Intent intent) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+	}
+
 	// Android获取一个用于打开Html文件的intent
 	public static Intent getHtmlFileIntent(String param) {
-
 		Uri uri = Uri.parse(param).buildUpon().encodedAuthority("com.android.htmlfileprovider").scheme("content").encodedPath(param).build();
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.setDataAndType(uri, "text/html");
@@ -122,78 +132,85 @@ public class OpenFileUtil {
 	}
 
 	// Android获取一个用于打开图片文件的intent
-	public static Intent getImageFileIntent(Context context, String authority, String param) {
+	private static Intent getImageFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "image/*");
 		return intent;
 	}
 
 	// Android获取一个用于打开PPT文件的intent
-	public static Intent getPptFileIntent(Context context, String authority, String param) {
+	private static Intent getPptFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
 		return intent;
 	}
 
 	// Android获取一个用于打开Excel文件的intent
-	public static Intent getExcelFileIntent(Context context, String authority, String param) {
+	private static Intent getExcelFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/vnd.ms-excel");
 		return intent;
 	}
 
 	// Android获取一个用于打开Word文件的intent
-	public static Intent getWordFileIntent(Context context, String authority, String param) {
+	private static Intent getWordFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/msword");
 		return intent;
 	}
 
 	// Android获取一个用于打开CHM文件的intent
-	public static Intent getChmFileIntent(Context context, String authority, String param) {
+	private static Intent getChmFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/x-chm");
 		return intent;
 	}
 
 	// Android获取一个用于打开文本文件的intent
-	public static Intent getTextFileIntent(Context context, String authority, String param) {
-
-		Intent intent = new Intent("android.intent.action.VIEW");
-		intent.addCategory("android.intent.category.DEFAULT");
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		Uri uri2 = getUriForFile(context, authority, param);
-		intent.setDataAndType(uri2, "text/plain");
-		return intent;
-	}
-
-	// Android获取一个用于打开PDF文件的intent
-	public static Intent getPdfFileIntent(Context context, String authority, String param) {
+	private static Intent getTextFileIntent(Context context, String authority, String param) {
 
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
+		intent.setDataAndType(uri, "text/plain");
+		return intent;
+	}
+
+	// Android获取一个用于打开PDF文件的intent
+	private static Intent getPdfFileIntent(Context context, String authority, String param) {
+
+		Intent intent = new Intent("android.intent.action.VIEW");
+		intent.addCategory("android.intent.category.DEFAULT");
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		Uri uri = getUriForFile(context, authority, param);
+		addFlags(intent);
 		intent.setDataAndType(uri, "application/pdf");
 		return intent;
 	}
