@@ -10,10 +10,15 @@ import androidx.fragment.app.Fragment;
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-10-12]
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment implements Notifyable{
 
 
 	public void showToast(String msg) {
 		UiUtils.showToast(getContext(),msg);
+	}
+
+	@Override
+	public void onNotify(String msg) {
+		showToast(msg);
 	}
 }

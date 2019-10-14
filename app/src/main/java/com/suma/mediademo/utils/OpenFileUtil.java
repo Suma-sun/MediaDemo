@@ -27,7 +27,7 @@ public class OpenFileUtil {
 		/* 取得扩展名 */
 		String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase(Locale.getDefault());
 		/* 依扩展名的类型决定MimeType */
-		if (end.equals("m4a") || end.equals("mp3") || end.equals("mid") || end.equals("xmf") || end.equals("ogg") || end.equals("wav")) {
+		if (end.equals("m4a") || end.equals("mp3") || end.equals("mid") || end.equals("xmf") || end.equals("ogg") || end.equals("wav") || end.equals("aac")) {
 			return getAudioFileIntent(context, authority, filePath);
 		} else if (end.equals("3gp") || end.equals("mp4")) {
 			return getVideoFileIntent(context, authority, filePath);

@@ -27,6 +27,8 @@ public class Constant {
 	/** WAV文件扩展名 */
 	public static final String WAV_EXTENSION = "wav";
 
+	public static final String ERR_MSG_COPY_FAIL = "拷贝原文件失败";
+
 	public static void init(Context context){
 		Context app = context.getApplicationContext();
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
