@@ -103,18 +103,19 @@ public class ExtractVideo implements Runnable {
 		Log.d(this, "==video==");
 		Log.d(this, StringUtils.format("==video==mime==%s", format.getString(MediaFormat.KEY_MIME)));
 		Log.d(this, StringUtils.format("==video==duration==%s", format.getLong(MediaFormat.KEY_DURATION)));
-		int frameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE);
-		Log.d(this, StringUtils.format("==video==frameRate==%d", 1000 * 1000 / frameRate));
+		int frameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE);//以帧/秒为单位描述视频格式的帧速率的键
+		Log.d(this, StringUtils.format("==video==frameRate==%d", frameRate));
 		Log.d(this, StringUtils.format("==video==flags==%d", extractor.getSampleFlags()));
 		Log.d(this, StringUtils.format("==video==sampleTime==%d", extractor.getSampleTime()));
 		Log.d(this, StringUtils.format("==video==TrackIndex==%d", extractor.getSampleTrackIndex()));
+		Log.d(this, StringUtils.format("==video==byteSize==%d", format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)));
 
 		//删除旧文件后创建
-		FileUtils.createFileByDeleteOldFile(mVideoFile);
+		FileUtils.createFileByDeleteOldFile(file);
 
 		MediaMuxer mediaMuxer;
 		try {
-			mediaMuxer = new MediaMuxer(mVideoFile.getPath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+			mediaMuxer = new MediaMuxer(file.getPath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
 		} catch (IOException e) {
 			Log.e(this, e);
 			return false;
@@ -130,6 +131,7 @@ public class ExtractVideo implements Runnable {
 		ByteBuffer buffer = ByteBuffer.allocate(size);
 
 		int count;
+//		int i = 0;
 		MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 		while ((count = extractor.readSampleData(buffer, 0)) > 0) {
 
@@ -142,13 +144,16 @@ public class ExtractVideo implements Runnable {
 			//需要给出是否为同步帧/关键帧
 			info.flags = extractor.getSampleFlags();
 			mediaMuxer.writeSampleData(trackId, buffer, info);
-
+			//打印出每一帧数据的时间,是否关键帧
+//			Log.d(this, StringUtils.format("==video:%d==sampleTime:%d==isSync:%b",i, extractor.getSampleTime(),extractor.getSampleFlags() == MediaExtractor.SAMPLE_FLAG_SYNC));
 			buffer.clear();
 			//下一帧
 			extractor.advance();
+//			i++;
 		}
 		mediaMuxer.stop();
 		mediaMuxer.release();
+		Log.d(this, "==video==extract success");
 		return true;
 	}
 }

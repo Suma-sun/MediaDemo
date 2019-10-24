@@ -18,8 +18,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
 /**
- * 抽取mp4的音频文件输出 <br>
- * 抽取音频,并在每一帧增加adts头
+ * 抽取mp4的音频数据输出aac文件 <br>
+ * 抽取音频数据,并在每一帧增加adts头
  *
  * @author suma 284425176@qq.com
  * @version [1.0, 2019-10-14]
@@ -97,6 +97,7 @@ public class ExtractAudio implements Runnable {
 		Log.d(this, StringUtils.format("==audio==samplwRate==%d", sampleRate));
 		Log.d(this, StringUtils.format("==audio==channelCount==%d", channel));
 		Log.d(this, StringUtils.format("==audio==sampleTime==%d", extractor.getSampleTime()));
+		Log.d(this, StringUtils.format("==video==byteSize==%d", format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)));
 		//删除旧文件后创建
 		FileUtils.createFileByDeleteOldFile(file);
 		//这里的缓冲区大小使用Formate里的值是防止过度申请内存和避免一次读取数据不完整需要循环读取
@@ -106,6 +107,7 @@ public class ExtractAudio implements Runnable {
 		try {
 			FileOutputStream outputStream = new FileOutputStream(file);
 			int count;
+//			int i = 0;
 			while ((count = extractor.readSampleData(buffer, 0)) > 0) {
 				//mp4中抽取的aac数据是不带ADTS头文件的,需手动添加
 
@@ -118,6 +120,9 @@ public class ExtractAudio implements Runnable {
 
 				outputStream.write(bytes, 0, bytes.length);
 				buffer.clear();
+				//打印出每一帧数据的时间,是否关键帧
+//				Log.d(this, StringUtils.format("==video:%d==sampleTime:%d==isSync:%b",i, extractor.getSampleTime(),extractor.getSampleFlags() == MediaExtractor.SAMPLE_FLAG_SYNC));
+//				i++;
 				//下一帧
 				extractor.advance();
 			}

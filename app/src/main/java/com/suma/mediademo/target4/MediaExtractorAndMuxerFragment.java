@@ -48,18 +48,22 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 
 	private static final String VIDEO_NAME = "test.mp4";
 	private static final String AUDIO_NAME = "test.aac";
+	private static final String NEW_NAME = "new.mp4";
 
 	private Button mBtnPlayOrigin;
 	private Button mBtnExtractAudio;
-	private Button mBtnOpenAudio;
+	private Button mBtnPlayAudio;
 	private Button mBtnExtractVideo;
-	private Button mBtnOpenVideo;
+	private Button mBtnPlayVideo;
+	private Button mBtnCreateMp4;
+	private Button mBtnPlayNew;
 
 
 	private File mDir;
 	private File mOriginFile;
 	private File mAudioFile;
 	private File mVideoFile;
+	private File mNewFile;//新和成的mp4文件
 	private ExecutorService mThreadPool;
 
 	@Override
@@ -69,6 +73,7 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 		mOriginFile = new File(mDir, SRC_FILE_NAME);
 		mAudioFile = new File(mDir, AUDIO_NAME);
 		mVideoFile = new File(mDir, VIDEO_NAME);
+		mNewFile = new File(mDir, NEW_NAME);
 		mThreadPool = Executors.newCachedThreadPool();
 		//将视频文件拷出指定目录
 		AssetManager assetManager = getActivity().getAssets();
@@ -117,9 +122,11 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 		bindListener();
 		view.addView(mBtnPlayOrigin, params1);
 		view.addView(mBtnExtractAudio, params1);
-		view.addView(mBtnOpenAudio, params1);
+		view.addView(mBtnPlayAudio, params1);
 		view.addView(mBtnExtractVideo, params1);
-		view.addView(mBtnOpenVideo, params1);
+		view.addView(mBtnPlayVideo, params1);
+		view.addView(mBtnCreateMp4, params1);
+		view.addView(mBtnPlayNew, params1);
 		return view;
 	}
 
@@ -128,12 +135,16 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 		mBtnPlayOrigin.setText("播放原文件");
 		mBtnExtractAudio = new Button(getContext());
 		mBtnExtractAudio.setText("分离音频");
-		mBtnOpenAudio = new Button(getContext());
-		mBtnOpenAudio.setText("打开分离后的音频");
+		mBtnPlayAudio = new Button(getContext());
+		mBtnPlayAudio.setText("打开分离后的音频");
 		mBtnExtractVideo = new Button(getContext());
 		mBtnExtractVideo.setText("分离视频");
-		mBtnOpenVideo = new Button(getContext());
-		mBtnOpenVideo.setText("打开分离后的视频");
+		mBtnPlayVideo = new Button(getContext());
+		mBtnPlayVideo.setText("打开分离后的视频");
+		mBtnCreateMp4 = new Button(getContext());
+		mBtnCreateMp4.setText("音频视频合成mp4");
+		mBtnPlayNew = new Button(getContext());
+		mBtnPlayNew.setText("播放新合成的mp4");
 	}
 
 	private void bindListener() {
@@ -146,7 +157,7 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 //			mThreadPool.submit(new ExtractRunnable(this,mOriginFile,mAudioFile,mVideoFile));
 			mThreadPool.submit(new ExtractAudio(this, mOriginFile.getPath(), mAudioFile));
 		});
-		mBtnOpenAudio.setOnClickListener(v -> {
+		mBtnPlayAudio.setOnClickListener(v -> {
 			Intent intent = OpenFileUtil.openFile(getContext(), mAudioFile.getPath());
 			if (intent != null)
 				getActivity().startActivity(intent);
@@ -155,8 +166,16 @@ public class MediaExtractorAndMuxerFragment extends BaseFragment {
 			mThreadPool.submit(new ExtractVideo(this, mOriginFile.getPath(), mVideoFile));
 		});
 
-		mBtnOpenVideo.setOnClickListener(v -> {
+		mBtnPlayVideo.setOnClickListener(v -> {
 			Intent intent = OpenFileUtil.openFile(getContext(), mVideoFile.getPath());
+			if (intent != null)
+				getActivity().startActivity(intent);
+		});
+		mBtnCreateMp4.setOnClickListener(v->{
+			mThreadPool.submit(new CreateMp4(this,mNewFile,mAudioFile,mVideoFile));
+		});
+		mBtnPlayNew.setOnClickListener(v->{
+			Intent intent = OpenFileUtil.openFile(getContext(), mNewFile.getPath());
 			if (intent != null)
 				getActivity().startActivity(intent);
 		});
