@@ -32,6 +32,15 @@ public class FragmentActivity extends androidx.fragment.app.FragmentActivity {
 		context.startActivity(intent);
 	}
 
+	/**
+	 * 打开指定的fragment
+	 */
+	public static void openFragment(Context context, Bundle data) {
+		Intent intent = new Intent(context, FragmentActivity.class);
+		intent.putExtras(data);
+		context.startActivity(intent);
+	}
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

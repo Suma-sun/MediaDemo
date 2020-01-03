@@ -17,6 +17,8 @@ import com.suma.mediademo.target1.view.ViewDrawPictureFragment;
 import com.suma.mediademo.target2.AudioFragment;
 import com.suma.mediademo.target3.CameraPreviewFragment;
 import com.suma.mediademo.target4.MediaExtractorAndMuxerFragment;
+import com.suma.mediademo.target5.ES20Util;
+import com.suma.mediademo.target5.GLSurfaceViewFragment;
 import com.suma.mediademo.utils.UiUtils;
 
 import androidx.annotation.NonNull;
@@ -75,7 +77,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				"SurfaceView绘制图片",
 				"音频录制播放",
 				"Camera预览",
-				"MP4解析与封装"
+				"MP4解析与封装",
+				"OpenGL绘制图形",
+				"OpenGL使用矩阵绘制图形"
 		};
 	}
 
@@ -105,6 +109,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				requestPermissionsImpl(mRWPermissions);
 				isRequestPermission = true;
 				break;
+			case 5:
+				startGLSurfaceFragment(ES20Util.TYPE_NORMAL);
+				return;
+//				mTargetName = GLSurfaceViewFragment.class.getName();
+//				break;
+			case 6:
+				startGLSurfaceFragment(ES20Util.TYPE_MATRIX);
+				return;
+//				mTargetName = GLSurfaceViewFragment.class.getName();
+//				break;
 			default:
 				return;
 		}
@@ -119,6 +133,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 			FragmentActivity.openFragment(this, name);
 		else
 			UiUtils.showToast(this,"目标为空");
+	}
+
+	/**
+	 * 跳转OpenGL绘制图形
+	 */
+	private void startGLSurfaceFragment(int type) {
+		Bundle data = new Bundle();
+		data.putString(FragmentActivity.EXTRA_FRAGMENT_NAME,GLSurfaceViewFragment.class.getName());
+		data.putInt(GLSurfaceViewFragment.EXTRA_TYPE,type);
+		FragmentActivity.openFragment(this,data);
 	}
 
 	@Override
