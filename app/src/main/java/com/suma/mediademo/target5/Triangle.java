@@ -17,16 +17,16 @@ public class Triangle implements DrawAble{
 	/**
 	 * 为了提高效率,将顶点的数组放入byteBuffer中
 	 */
-	private FloatBuffer vertexBuffer;
+	private FloatBuffer mVertexBuffer;
 	/**
-	 * 最大顶点数（三角形只需确认三个顶点）
+	 * 每一次读取顶点的数量，xyz
 	 */
-	static final int COORDS_PER_VERTEX = 3;
+	private static final int COORDS_PER_VERTEX = 3;
 
 	/**
 	 * 三个顶点的坐标,想象一个-2～2的坐标体系
 	 */
-	static final float[] triangleCoords = {
+	private static final float[] TRIANGLE_COORDS = {
 			//x,y,z右手定则，opengl默认0,0为中点,1为屏幕边缘
 //			0f,0.5f,0f, //中间上方的顶点
 //			-0.5f,0f,0f,//左下方顶点
@@ -41,25 +41,24 @@ public class Triangle implements DrawAble{
 	};
 
 
-
 	// 红，绿，蓝三个颜色，及透明度值
-	float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
+	private static final float[] mColor = {0.63671875f, 0.76953125f, 0.22265625f, 1.0f};
 
 	private final int mProgram;
 	//vPosition成员的句柄
-	private int positionHandle;
-	//vColor成员的句柄
-	private int colorHandle;
+	private int mPositionHandle;
+	/* vColor成员的句柄 */
+	private int mColorHandle;
 	//uMVPMatrix成员的句柄，用于设置视图转换
-	private int uMVPMatrixHandle;
+	private int mMVPMatrixHandle;
 	//顶点数据所需字节数，每个int类型4个字节
-	private final int vertexStride = COORDS_PER_VERTEX * 4;
+	private final int mVertexStride = COORDS_PER_VERTEX * 4;
 	//顶点的数量
-	private final int vertexCount = triangleCoords.length;
+	private final int mVertexCount = TRIANGLE_COORDS.length;
 
 	public Triangle(int type) {
 		//创建顶点数组缓冲区
-		vertexBuffer = ES20Util.createCoordsBuffer(triangleCoords);
+		mVertexBuffer = ES20Util.createCoordsBuffer(TRIANGLE_COORDS);
 		mProgram = ES20Util.getESProgram(type);
 	}
 
@@ -68,54 +67,54 @@ public class Triangle implements DrawAble{
 //		//将程序添加至OpenGL环境
 //		GLES20.glUseProgram(mProgram);
 //		//获取顶点着色器的vPosition成员句柄
-//		positionHandle = GLES20.glGetAttribLocation(mProgram,"vPosition");
+//		mPositionHandle = GLES20.glGetAttribLocation(mProgram,"vPosition");
 //		//启用三角形顶点
-//		GLES20.glEnableVertexAttribArray(positionHandle);
+//		GLES20.glEnableVertexAttribArray(mPositionHandle);
 //		//准备三角形坐标数据
-//		GLES20.glVertexAttribPointer(positionHandle,COORDS_PER_VERTEX, GLES20.GL_FLOAT,false,vertexStride,vertexBuffer);
+//		GLES20.glVertexAttribPointer(mPositionHandle,COORDS_PER_VERTEX, GLES20.GL_FLOAT,false,mVertexStride,mVertexBuffer);
 //		//获取片元着色器的vColor成员句柄
-//		colorHandle = GLES20.glGetUniformLocation(mProgram,"vColor");
+//		mColorHandle = GLES20.glGetUniformLocation(mProgram,"vColor");
 //		//设置绘制三角形的颜色
-//		GLES20.glUniform4fv(colorHandle,1,color,0);
+//		GLES20.glUniform4fv(mColorHandle,1,mColor,0);
 //		//绘制三角形
-//		GLES20.glDrawArrays(GLES20.GL_TRIANGLES,0,vertexCount);
+//		GLES20.glDrawArrays(GLES20.GL_TRIANGLES,0,mVertexCount);
 //		//禁用顶点数组
-//		GLES20.glDisableVertexAttribArray(positionHandle);
+//		GLES20.glDisableVertexAttribArray(mPositionHandle);
 		draw(null);
 	}
 
 	/**
 	 * 带矩阵功能绘制图形
 	 *
-	 * @param matrix
+	 * @param matrix 总变换矩阵
 	 */
 	@Override
 	public void draw(float[] matrix) {
 		//将程序添加至OpenGL环境
 		GLES20.glUseProgram(mProgram);
 		//获取顶点着色器的vPosition成员句柄
-		positionHandle = GLES20.glGetAttribLocation(mProgram,ES20Util.NAME_POSITION);
+		mPositionHandle = GLES20.glGetAttribLocation(mProgram,ES20Util.NAME_POSITION);
 		//启用三角形顶点
-		GLES20.glEnableVertexAttribArray(positionHandle);
+		GLES20.glEnableVertexAttribArray(mPositionHandle);
 		//准备三角形坐标数据
-		GLES20.glVertexAttribPointer(positionHandle,COORDS_PER_VERTEX, GLES20.GL_FLOAT,false,vertexStride,vertexBuffer);
+		GLES20.glVertexAttribPointer(mPositionHandle,COORDS_PER_VERTEX, GLES20.GL_FLOAT,false, mVertexStride, mVertexBuffer);
 		//获取片元着色器的vColor成员句柄
-		colorHandle = GLES20.glGetUniformLocation(mProgram,ES20Util.NAME_COLOR);
+		mColorHandle = GLES20.glGetUniformLocation(mProgram,ES20Util.NAME_COLOR);
 		//设置绘制三角形的颜色
-		GLES20.glUniform4fv(colorHandle,1,color,0);
+		GLES20.glUniform4fv(mColorHandle,1, mColor,0);
 
 		if (matrix != null) {
 			//获取图形转换矩阵句柄
-			uMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram,ES20Util.NAME_MVP_MATRIX);
+			mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram,ES20Util.NAME_MVP_MATRIX);
 			ES20Util.checkError("glGetUniformLocation matrix");
 			//设置矩阵
-			GLES20.glUniformMatrix4fv(uMVPMatrixHandle,1,false,matrix,0);
+			GLES20.glUniformMatrix4fv(mMVPMatrixHandle,1,false,matrix,0);
 			ES20Util.checkError("glUniformMatrix4fv");
 		}
 
 		//绘制三角形
-		GLES20.glDrawArrays(GLES20.GL_TRIANGLES,0,vertexCount);
+		GLES20.glDrawArrays(GLES20.GL_TRIANGLES,0, mVertexCount);
 		//禁用顶点数组
-		GLES20.glDisableVertexAttribArray(positionHandle);
+		GLES20.glDisableVertexAttribArray(mPositionHandle);
 	}
 }

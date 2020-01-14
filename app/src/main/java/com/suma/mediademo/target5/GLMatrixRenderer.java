@@ -103,14 +103,18 @@ public class GLMatrixRenderer implements GLSurfaceView.Renderer {
 		GLES20.glViewport(0, 0, width, height);
 		//计算宽高比例
 		float ratio = (float) width / height;
-
 		//透视投影，物体离视点越远，呈现出来的越小。离视点越近，呈现出来的越大
 		//正交投影，物体呈现出来的大小不会随着其距离视点的远近而发生变化
 
 		//传入透视投影矩阵对象及参数，onDrawFrame中会使用传该对象与相机视图转换合并
 		Matrix.frustumM(mProjectionMatrix,0,-ratio,ratio,-1,1,3,7);
+		//设置相机位置
+		Matrix.setLookAtM(mViewMatrix,0,0,0,-3,
+				0f,0f,0f,
+				0f,1.0f,0.0f);
+		//计算投影和视图转换
+		Matrix.multiplyMM(mVPMatrix,0,mProjectionMatrix,0,mViewMatrix,0);
 	}
-
 	/*
 	透视投影
 	Matrix.frustumM (float[] m,         //接收透视投影的变换矩阵
@@ -157,12 +161,6 @@ public class GLMatrixRenderer implements GLSurfaceView.Renderer {
 
 		//清空屏幕，清空屏幕后调用glClearColor(）中设置的颜色填充屏幕；
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-		//设置相机位置
-		Matrix.setLookAtM(mViewMatrix,0,0,0,-3,
-				0f,0f,0f,
-				0f,1.0f,0.0f);
-		//计算投影和视图转换
-		Matrix.multiplyMM(mVPMatrix,0,mProjectionMatrix,0,mViewMatrix,0);
 
 		if (mTriangle != null)
 			mTriangle.draw(mVPMatrix);

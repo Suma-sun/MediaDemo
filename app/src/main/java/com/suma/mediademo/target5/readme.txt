@@ -13,3 +13,10 @@ http://support.supermap.com.cn/DataWarehouse/WebDocHelp/OnlineHelp/Flash3D/G_Pro
 
 Android OpenGL栏目资料
 https://blog.csdn.net/junzia/category_9269184.html
+
+
+OpenGL ES20 在线文档
+https://www.khronos.org/registry/OpenGL-Refpages/es2.0/
+
+OpenGL中文教学
+https://learnopengl-cn.readthedocs.io/zh/latest/

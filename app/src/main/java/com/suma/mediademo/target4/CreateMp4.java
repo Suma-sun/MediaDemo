@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  */
 public class CreateMp4 implements Runnable {
 
-	private WeakReference<Notifyable> reference;
+	private WeakReference<Notifyable> mReference;
 	private File mNewFile;
 	private File mAudioFile;
 	private File mVideoFile;
@@ -39,7 +39,7 @@ public class CreateMp4 implements Runnable {
 	 * @param video   视频文件
 	 */
 	public CreateMp4(Notifyable reference, File outFile, File audio, File video) {
-		this.reference = new WeakReference<>(reference);
+		this.mReference = new WeakReference<>(reference);
 		this.mNewFile = outFile;
 		this.mAudioFile = audio;
 		this.mVideoFile = video;
@@ -47,7 +47,7 @@ public class CreateMp4 implements Runnable {
 
 	@Override
 	public void run() {
-		Notifyable notifyable = reference.get();
+		Notifyable notifyable = mReference.get();
 		if (notifyable == null)
 			return;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -212,8 +212,6 @@ public class CreateMp4 implements Runnable {
 	/**
 	 * 设置视频文件
 	 *
-	 * @param notifyable
-	 * @param videoExtractor
 	 * @return true:执行失败
 	 */
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)

@@ -3,6 +3,7 @@ package com.suma.mediademo.target5;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
+import com.suma.mediademo.target6.TextureRenderer;
 import com.suma.mediademo.utils.Log;
 
 /**
@@ -22,26 +23,27 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	 * Standard View constructor. In order to render something, you
 	 * must call {@link #setRenderer} to register a renderer.
 	 *
-	 * @param context
+	 * @param type {@link ES20Util#TYPE_NORMAL} {@link ES20Util#TYPE_MATRIX} {@link ES20Util#TYPE_TEXTURE}
 	 */
 	public MyGLSurfaceView(Context context, int type) {
 		super(context);
 
-		// Create an OpenGL ES 2.0 context
+		// 设置使用es 2.0版本
 		setEGLContextClientVersion(2);
 		Log.d(this,"MyGLSurfaceView type = " + type);
 		if (type == ES20Util.TYPE_MATRIX)
 			mRenderer = new GLMatrixRenderer();
+		else if (type == ES20Util.TYPE_TEXTURE)
+			mRenderer = new TextureRenderer(getContext());
 		else
 			mRenderer = new GLRenderer();
 
-		// Set the Renderer for drawing on the GLSurfaceView
+		// 设置负责绘制的渲染器
 		setRenderer(mRenderer);
 
-		// Render the view only when there is a change in the drawing data
 		//懒惰渲染,需要手动调用glSurfeaceView.requestRender()
 		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-		//积极渲染 不停的渲染
+		//积极渲染 不停的渲染，适合有交互、播放帧数据的场景
 //		setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
 	}

@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 		mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 		mAdapter.addAll(getItems());
 		mListView.setAdapter(mAdapter);
-		mListView.setPadding(0,600,0,0);
+//		mListView.setPadding(0,600,0,0);
 		mListView.setOnItemClickListener(this);
 
 		initPermisions();
@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				"Camera预览",
 				"MP4解析与封装",
 				"OpenGL绘制图形",
-				"OpenGL使用矩阵绘制图形"
+				"OpenGL使用矩阵绘制图形",
+				"OpenGL使用矩阵绘制纹理"
 		};
 	}
 
@@ -119,6 +120,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 				return;
 //				mTargetName = GLSurfaceViewFragment.class.getName();
 //				break;
+			case 7:
+				startGLSurfaceFragment(ES20Util.TYPE_TEXTURE);
+				return;
 			default:
 				return;
 		}

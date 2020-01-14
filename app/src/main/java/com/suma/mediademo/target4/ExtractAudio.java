@@ -25,19 +25,19 @@ import java.nio.ByteBuffer;
  * @version [1.0, 2019-10-14]
  */
 public class ExtractAudio implements Runnable {
-	private WeakReference<Notifyable> reference;
+	private WeakReference<Notifyable> mReference;
 	private String mPath;
 	private File mAudioFile;
 
 	public ExtractAudio(Notifyable notifyable, String srcPath, File audio) {
-		this.reference = new WeakReference<>(notifyable);
+		this.mReference = new WeakReference<>(notifyable);
 		this.mPath = srcPath;
 		this.mAudioFile = audio;
 	}
 
 	@Override
 	public void run() {
-		Notifyable notifyable = reference.get();
+		Notifyable notifyable = mReference.get();
 		if (notifyable == null)
 			return;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {

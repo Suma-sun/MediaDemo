@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  * @version [1.0, 2019-10-14]
  */
 public class ExtractVideo implements Runnable {
-	private WeakReference<Notifyable> reference;
+	private WeakReference<Notifyable> mReference;
 	private String mPath;
 	private File mVideoFile;
 
@@ -36,14 +36,14 @@ public class ExtractVideo implements Runnable {
 	 * @param video   输出的视频文件
 	 */
 	public ExtractVideo(Notifyable notify, String srcPath, File video) {
-		this.reference = new WeakReference<>(notify);
+		this.mReference = new WeakReference<>(notify);
 		this.mPath = srcPath;
 		this.mVideoFile = video;
 	}
 
 	@Override
 	public void run() {
-		Notifyable notifyable = reference.get();
+		Notifyable notifyable = mReference.get();
 		if (notifyable == null)
 			return;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
