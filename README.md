@@ -1,5 +1,6 @@
 # MediaDemo
 Android音视频从零开始学习代码.每节有不同的课题.（目前已完成1~6）<p>
+ffmpeg相关改为https://github.com/Suma-sun/ffmpegDemo<p>
 课题目录：<br>
   1、在 Android 平台绘制一张图片，使用至少 3 种不同的 API，ImageView，SurfaceView，自定义 View<br>
   2、在 Android 平台使用 AudioRecord 和 AudioTrack API 完成音频 PCM 数据的采集和播放，并实现读写音频 wav 文件<br>
